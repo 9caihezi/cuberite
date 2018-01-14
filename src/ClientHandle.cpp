@@ -1394,7 +1394,6 @@ void cClientHandle::FinishDigAnimation()
 
 
 
-
 void cClientHandle::HandleRightClick(int a_BlockX, int a_BlockY, int a_BlockZ, eBlockFace a_BlockFace, int a_CursorX, int a_CursorY, int a_CursorZ, eHand a_Hand)
 {
 	// This function handles three actions:
@@ -1412,6 +1411,7 @@ void cClientHandle::HandleRightClick(int a_BlockX, int a_BlockY, int a_BlockZ, e
 	// E.g., when opening a chest with a dirt in hand, if the plugin rejects opening the chest, the dirt will not be placed.
 
 	// TODO: We are still consuming the items in main hand. Remove this override when the off-hand consumption is handled correctly.
+	eHand a_HandReal = a_Hand;  // TODO: remove this
 	a_Hand = eHand::hMain;
 	const cItem & HeldItem = (a_Hand == eHand::hOff) ? m_Player->GetInventory().GetShieldSlot() : m_Player->GetEquippedItem();
 	cItemHandler * ItemHandler = cItemHandler::GetItemHandler(HeldItem.m_ItemType);
@@ -1483,7 +1483,7 @@ void cClientHandle::HandleRightClick(int a_BlockX, int a_BlockY, int a_BlockZ, e
 			{
 				// All plugins agree with using the item
 				cBlockInServerPluginInterface PluginInterface(*World);
-				ItemHandler->OnItemUse(World, m_Player, PluginInterface, HeldItem, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace);
+				ItemHandler->OnItemUse(World, m_Player, PluginInterface, HeldItem, a_HandReal);
 				PlgMgr->CallHookPlayerUsedItem(*m_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace, a_CursorX, a_CursorY, a_CursorZ);
 				Success = true;
 			}
@@ -1743,8 +1743,6 @@ void cClientHandle::HandleUseItem(eHand a_Hand)
 	// In version 1.8.x, this function shares the same packet id with HandleRightClick.
 	// In version >= 1.9, there is a new packet id for "Use Item".
 
-	// TODO: We are still consuming the items in main hand. Remove this override when the off-hand consumption is handled correctly.
-	a_Hand = eHand::hMain;
 	const cItem & HeldItem = (a_Hand == eHand::hOff) ? m_Player->GetInventory().GetShieldSlot() : m_Player->GetEquippedItem();
 	cItemHandler * ItemHandler = cItemHandler::GetItemHandler(HeldItem.m_ItemType);
 	cWorld * World = m_Player->GetWorld();
@@ -1772,7 +1770,7 @@ void cClientHandle::HandleUseItem(eHand a_Hand)
 		}
 		if (!PlgMgr->CallHookPlayerEating(*m_Player))
 		{
-			m_Player->StartEating();
+			m_Player->StartEating(a_Hand);
 		}
 	}
 	else
@@ -1782,7 +1780,7 @@ void cClientHandle::HandleUseItem(eHand a_Hand)
 		{
 			// All plugins agree with using the item
 			cBlockInServerPluginInterface PluginInterface(*World);
-			ItemHandler->OnItemUse(World, m_Player, PluginInterface, HeldItem, -1, 255, -1, BLOCK_FACE_NONE);
+			ItemHandler->OnItemUse(World, m_Player, PluginInterface, HeldItem, a_Hand);
 			PlgMgr->CallHookPlayerUsedItem(*m_Player, -1, 255, -1, BLOCK_FACE_NONE, 0, 0, 0);
 		}
 	}

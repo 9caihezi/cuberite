@@ -113,7 +113,7 @@ public:
 	// tolua_end
 
 	/** Starts charging the equipped bow */
-	void StartChargingBow(void);
+	void StartChargingBow(eHand a_Hand);
 
 	/** Finishes charging the current bow. Returns the number of ticks for which the bow has been charged */
 	int FinishChargingBow(void);
@@ -123,6 +123,9 @@ public:
 
 	/** Returns true if the player is currently charging the bow */
 	bool IsChargingBow(void) const { return m_IsChargingBow; }
+
+	/** Returns an eHand enum indicating which hand is used for charging bow */
+	eHand GetChargingBowHand() const { return m_ChargingBowHand; }
 
 	void SetTouchGround(bool a_bTouchGround);
 	inline void SetStance(const double a_Stance) { m_Stance = a_Stance; }
@@ -136,7 +139,8 @@ public:
 	/** Gets the contents of the player's associated enderchest */
 	cItemGrid & GetEnderChestContents(void) { return m_EnderChestContents; }
 
-	inline const cItem & GetEquippedItem(void) const { return GetInventory().GetEquippedItem(); }  // tolua_export
+	inline const cItem & GetEquippedItem() const { return GetInventory().GetEquippedItem(); }  // tolua_export
+	inline const cItem & GetEquippedItem(eHand a_Hand) const { return a_Hand == hMain ? GetInventory().GetEquippedItem() : GetInventory().GetShieldSlot(); }
 
 	/** Returns whether the player is climbing (ladders, vines etc.) */
 	bool IsClimbing(void) const;
@@ -370,7 +374,7 @@ public:
 	}
 
 	/** Starts eating the currently equipped item. Resets the eating timer and sends the proper animation packet */
-	void StartEating(void);
+	void StartEating(eHand a_Hand);
 
 	/** Finishes eating the currently equipped item. Consumes the item, updates health and broadcasts the packets */
 	void FinishEating(void);
@@ -416,11 +420,11 @@ public:
 
 	/** Damage the player's equipped item by a_Damage, possibly less if the
 	equipped item is enchanted. */
-	void UseEquippedItem(short a_Damage = 1);
+	void UseEquippedItem(short a_Damage = 1, eHand a_Hand = hMain);
 
 	/** Damage the player's equipped item by the amount of damage such an item
 	is damaged by when used for a_Action */
-	void UseEquippedItem(cItemHandler::eDurabilityLostAction a_Action);
+	void UseEquippedItem(cItemHandler::eDurabilityLostAction a_Action, eHand a_Hand = hMain);
 
 	void SendHealth(void);
 
@@ -686,6 +690,7 @@ protected:
 
 	/** The world tick in which eating will be finished. -1 if not eating */
 	Int64 m_EatingFinishTick;
+	eHand m_EatingWithHand;
 
 	/** Player Xp level */
 	int m_LifetimeTotalXp;
@@ -695,6 +700,7 @@ protected:
 	bool m_bDirtyExperience;
 
 	bool m_IsChargingBow;
+	eHand m_ChargingBowHand;
 	int  m_BowCharge;
 
 	UInt32 m_FloaterID;

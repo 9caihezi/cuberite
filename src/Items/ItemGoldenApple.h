@@ -19,9 +19,9 @@ public:
 	}
 
 
-	virtual bool EatItem(cPlayer * a_Player, cItem * a_Item) override
+	virtual bool EatItem(cPlayer * a_Player, cItem * a_Item, eHand a_Hand) override
 	{
-		super::EatItem(a_Player, a_Item);
+		super::EatItem(a_Player, a_Item, a_Hand);
 
 		// Enchanted golden apples have stronger effects:
 		if (a_Item->m_ItemDamage >= E_META_GOLDEN_APPLE_ENCHANTED)
